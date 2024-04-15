@@ -1,7 +1,6 @@
 const express = require("express");
 const { getTopics } = require("./controllers/app.controller");
 const endpointData = require("./endpoints.json");
-const e = require("express");
 
 const app = express();
 
