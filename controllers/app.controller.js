@@ -1,5 +1,5 @@
 const { readTopics } = require("../models/app.model");
-const endpointData = require("./endpoints.json");
+const endpointData = require("../endpoints.json");
 
 function getTopics(req, res, next) {
   readTopics().then((topics) => {
