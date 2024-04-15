@@ -40,6 +40,45 @@ describe("/api", () => {
   });
 });
 
+describe("/api/articles/:article_id", () => {
+  test("GET 200: Responds with specified article object.", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const article = body;
+        expect(article.title).toBe("Living in the shadow of a great man");
+        expect(article.topic).toBe("mitch");
+        expect(article.author).toBe("butter_bridge");
+        expect(article.body).toBe("I find this existence challenging");
+        expect(article.topic).toBe("mitch");
+        expect(article.article_img_url).toBe(
+          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+        );
+        expect(article.created_at).toBe("2020-07-09T20:11:00.000Z");
+        expect(article.votes).toBe(100);
+        expect(article.article_id).toBe(1);
+      });
+  });
+
+  test("GET 404: Responds with error message when passed article_id that doesn't exist.", () => {
+    return request(app)
+      .get("/api/articles/99")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Article not found." });
+      });
+  });
+
+  test("GET 400: Responds with error message when passed invalid article_id.", () => {
+    return request(app)
+      .get("/api/articles/latest")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Bad request." });
+      });
+  });
+});
 describe("general errors", () => {
   test("GET 400: Responds with error message when called with incorrect endpoint.", () => {
     return request(app)
