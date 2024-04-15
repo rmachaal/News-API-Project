@@ -1,10 +1,13 @@
 const { readTopics } = require("../models/app.model");
+const endpointData = require("./endpoints.json");
 
 function getTopics(req, res, next) {
-  readTopics()
-    .then((topics) => {
-      res.status(200).send(topics);
-    })
+  readTopics().then((topics) => {
+    res.status(200).send(topics);
+  });
 }
 
-module.exports = { getTopics };
+function getEndpoints(req, res, next) {
+  res.status(200).send(endpointData);
+}
+module.exports = { getTopics, getEndpoints };
