@@ -4,6 +4,7 @@ const {
   readArticles,
   readCommentsByArticleId,
   checksArticleExists,
+  addsComment,
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -46,10 +47,21 @@ function getCommentsByArticleId(req, res, next) {
     .catch(next);
 }
 
+function postComment(req, res, next) {
+  const { article_id } = req.params;
+  const newComment = req.body;
+  addsComment(article_id, newComment)
+    .then((comment) => {
+      res.status(201).send({ comment });
+    })
+    .catch(next);
+}
+
 module.exports = {
   getTopics,
   getEndpoints,
   getArticleById,
   getArticles,
   getCommentsByArticleId,
+  postComment,
 };
