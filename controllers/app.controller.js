@@ -1,4 +1,10 @@
-const { readTopics, readArticleById, readArticles } = require("../models/app.model");
+const {
+  readTopics,
+  readArticleById,
+  readArticles,
+  readCommentsByArticleId,
+  checksArticleExists,
+} = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
 function getTopics(req, res, next) {
@@ -21,11 +27,29 @@ function getArticleById(req, res, next) {
   const { article_id } = req.params;
   readArticleById(article_id)
     .then((article) => {
-      res.status(200).send({article});
+      res.status(200).send({ article });
     })
     .catch((err) => {
       next(err);
     });
 }
 
-module.exports = { getTopics, getEndpoints, getArticleById, getArticles };
+function getCommentsByArticleId(req, res, next) {
+  const { article_id } = req.params;
+  Promise.all([
+    readCommentsByArticleId(article_id),
+    checksArticleExists(article_id),
+  ])
+    .then(([comments]) => {
+      res.status(200).send({ comments });
+    })
+    .catch(next);
+}
+
+module.exports = {
+  getTopics,
+  getEndpoints,
+  getArticleById,
+  getArticles,
+  getCommentsByArticleId,
+};
