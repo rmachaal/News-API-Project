@@ -3,7 +3,7 @@ const app = require("../app");
 const data = require("../db/data/test-data");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
-const endpoints = require("../endpoints.json");
+const endpointData = require("../endpoints.json");
 
 beforeEach(() => {
   return seed(data);
@@ -19,7 +19,7 @@ describe("/api/topics", () => {
       .get("/api/topics")
       .expect(200)
       .then(({ body }) => {
-        const topics = body;
+        const { topics } = body;
         expect(topics.length).toBe(3);
         topics.forEach((topic) => {
           expect(typeof topic.slug).toBe("string"),
@@ -35,7 +35,7 @@ describe("/api", () => {
       .get("/api")
       .expect(200)
       .then(({ body }) => {
-        expect(body).toEqual(endpoints);
+        expect(body).toEqual({ endpointData });
       });
   });
 });
@@ -46,7 +46,7 @@ describe("/api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        const article = body;
+        const { article } = body;
         expect(article.title).toBe("Living in the shadow of a great man");
         expect(article.topic).toBe("mitch");
         expect(article.author).toBe("butter_bridge");
@@ -79,6 +79,46 @@ describe("/api/articles/:article_id", () => {
       });
   });
 });
+
+describe("/api/articles", () => {
+  test("GET 200: Responds with array of all article objects.", () => {
+    const exampleArticle = {
+      title: expect.any(String),
+      topic: expect.any(String),
+      author: expect.any(String),
+      votes: expect.any(Number),
+      created_at: expect.any(String),
+      article_img_url: expect.any(String),
+      article_id: expect.any(Number),
+      comment_count: expect.any(Number),
+    };
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(article).toMatchObject(exampleArticle);
+        });
+      });
+  });
+
+  test("GET 200: Responds with all article objects sorted by date in descending order", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+        articles.forEach((article) => {
+          expect(article).not.toHaveProperty("body");
+        });
+        
+      });
+  });
+});
+
 describe("general errors", () => {
   test("GET 400: Responds with error message when called with incorrect endpoint.", () => {
     return request(app)
