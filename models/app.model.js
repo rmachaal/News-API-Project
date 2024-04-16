@@ -61,10 +61,25 @@ function checksArticleExists(article_id) {
     });
 }
 
+function addsComment(article_id, newComment) {
+  return db
+    .query(
+      `INSERT INTO comments(body, author, article_id) VALUES($1, $2, $3) RETURNING *;`,
+      [newComment.body, newComment.username, article_id]
+    )
+    .then(({ rows }) => {
+      if (rows[0].body.length === 0) {
+        return Promise.reject({ code: "23502" });
+      }
+      return rows[0];
+    });
+}
+
 module.exports = {
   readTopics,
   readArticleById,
   readArticles,
   readCommentsByArticleId,
   checksArticleExists,
+  addsComment,
 };

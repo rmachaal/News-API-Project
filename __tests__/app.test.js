@@ -119,54 +119,151 @@ describe("/api/articles", () => {
 });
 
 describe("/api/articles/:article_id/comments", () => {
-  test("GET 200: Responds with array of comments for the given article_id, with the most recent comments first.", () => {
-    const exampleComment = {
-      comment_id: expect.any(Number),
-      votes: expect.any(Number),
-      created_at: expect.any(String),
-      author: expect.any(String),
-      body: expect.any(String),
-      article_id: expect.any(Number),
-    };
-    return request(app)
-      .get("/api/articles/1/comments")
-      .expect(200)
-      .then(({ body }) => {
-        const { comments } = body;
-        expect(comments.length).toBe(11);
-        expect(comments).toBeSortedBy("created_at", { descending: true });
-        comments.forEach((comment) => {
-          expect(comment).toMatchObject(exampleComment);
+  describe("GET", () => {
+    test("GET 200: Responds with array of comments for the given article_id, with the most recent comments first.", () => {
+      const exampleComment = {
+        comment_id: expect.any(Number),
+        votes: expect.any(Number),
+        created_at: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        article_id: expect.any(Number),
+      };
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments.length).toBe(11);
+          expect(comments).toBeSortedBy("created_at", { descending: true });
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject(exampleComment);
+          });
         });
-      });
-  });
+    });
 
-  test("GET 400: Responds with error message when passed invalid article_id.", () => {
-    return request(app)
-      .get("/api/articles/earliest/comments")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Bad request." });
-      });
-  });
+    test("GET 400: Responds with error message when passed invalid article_id.", () => {
+      return request(app)
+        .get("/api/articles/earliest/comments")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
 
-  test("GET 404: Responds with error message when passed article_id that doesnt exist.", () => {
-    return request(app)
-      .get("/api/articles/99/comments")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Invalid article_id." });
-      });
-  });
+    test("GET 404: Responds with error message when passed article_id that doesnt exist.", () => {
+      return request(app)
+        .get("/api/articles/99/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid article_id." });
+        });
+    });
 
-  test("GET 200: Responds with empty array when passed a valid article_id with no comments.", () => {
-    return request(app)
-      .get("/api/articles/2/comments")
-      .expect(200)
-      .then(({ body }) => {
-        const { comments } = body;
-        expect(comments.length).toBe(0);
+    test("GET 200: Responds with empty array when passed a valid article_id with no comments.", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body }) => {
+          const { comments } = body;
+          expect(comments.length).toBe(0);
+        });
+    });
+
+    describe("POST", () => {
+      test("POST 201: Responds with newly created comment for given article_id.", () => {
+        const newComment = {
+          body: "interesting read!",
+          username: "rogersop",
+        };
+
+        const expectedComment = {
+          comment_id: expect.any(Number),
+          body: "interesting read!",
+          article_id: 3,
+          author: "rogersop",
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+        };
+        return request(app)
+          .post("/api/articles/3/comments")
+          .send(newComment)
+          .expect(201)
+          .then(({ body }) => {
+            const { comment } = body;
+            expect(comment).toMatchObject(expectedComment);
+          });
       });
+
+      test("POST 400: Responds with error message when passed invalid article_id.", () => {
+        const newComment = {
+          body: "interesting read!",
+          username: "rogersop",
+        };
+        return request(app)
+          .post("/api/articles/earliest/comments")
+          .send(newComment)
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad request." });
+          });
+      });
+
+      test("POST 404: Responds with error message when passed article_id that doesnt exist.", () => {
+        const newComment = {
+          body: "interesting read!",
+          username: "rogersop",
+        };
+        return request(app)
+          .post("/api/articles/99/comments")
+          .send(newComment)
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid request." });
+          });
+      });
+
+      test('POST 404: Responds with error message when passed username that doesnt exist.', () => {
+        const newComment = {
+          body: "interesting read!",
+          username: "rmachaal",
+        };
+        return request(app)
+          .post("/api/articles/3/comments")
+          .send(newComment)
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid request." });
+          });
+      });
+
+      test('POST 400: Responds with error message when passed request body with no body property.', () => {
+        const newComment = {
+          username: "rogersop",
+        };
+        return request(app)
+          .post("/api/articles/3/comments")
+          .send(newComment)
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Comment cannot be blank." });
+          });
+      });
+
+      test("POST 400: Responds with error message when passed request body with empty body property.", () => {
+        const newComment = {
+          body: "",
+          username: "rogersop",
+        };
+        return request(app)
+          .post("/api/articles/3/comments")
+          .send(newComment)
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Comment cannot be blank." });
+          });
+      });
+    });
   });
 });
 
