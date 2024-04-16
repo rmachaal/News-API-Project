@@ -114,7 +114,58 @@ describe("/api/articles", () => {
         articles.forEach((article) => {
           expect(article).not.toHaveProperty("body");
         });
-        
+      });
+  });
+});
+
+describe("/api/articles/:article_id/comments", () => {
+  test("GET 200: Responds with array of comments for the given article_id, with the most recent comments first.", () => {
+    const exampleComment = {
+      comment_id: expect.any(Number),
+      votes: expect.any(Number),
+      created_at: expect.any(String),
+      author: expect.any(String),
+      body: expect.any(String),
+      article_id: expect.any(Number),
+    };
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(11);
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+        comments.forEach((comment) => {
+          expect(comment).toMatchObject(exampleComment);
+        });
+      });
+  });
+
+  test("GET 400: Responds with error message when passed invalid article_id.", () => {
+    return request(app)
+      .get("/api/articles/earliest/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Bad request." });
+      });
+  });
+
+  test("GET 404: Responds with error message when passed article_id that doesnt exist.", () => {
+    return request(app)
+      .get("/api/articles/99/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Invalid article_id." });
+      });
+  });
+
+  test("GET 200: Responds with empty array when passed a valid article_id with no comments.", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments.length).toBe(0);
       });
   });
 });
