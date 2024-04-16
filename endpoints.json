@@ -45,6 +45,24 @@
       ]
     }
   },
+  "PATCH /api/articles/:article_id": {
+    "description": "responds with updated article object for given article_id",
+    "queries": [],
+    "exampleResponse": {
+      "updatedArticle": [
+        {
+          "title": "Seafood substitutions are increasing",
+          "topic": "cooking",
+          "author": "weegembump",
+          "body": "Text from the article..",
+          "created_at": "2018-05-30T15:59:13.341Z",
+          "votes": 3,
+          "comment_count": 6,
+          "article_id": 15
+        }
+      ]
+    }
+  },
   "GET /api/articles/:article_id/comments": {
     "description": "responds with comments for given article_id, with most recent comments first.",
     "queries": [],
