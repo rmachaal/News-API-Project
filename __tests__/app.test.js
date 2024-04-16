@@ -41,42 +41,113 @@ describe("/api", () => {
 });
 
 describe("/api/articles/:article_id", () => {
-  test("GET 200: Responds with specified article object.", () => {
-    return request(app)
-      .get("/api/articles/1")
-      .expect(200)
-      .then(({ body }) => {
-        const { article } = body;
-        expect(article.title).toBe("Living in the shadow of a great man");
-        expect(article.topic).toBe("mitch");
-        expect(article.author).toBe("butter_bridge");
-        expect(article.body).toBe("I find this existence challenging");
-        expect(article.topic).toBe("mitch");
-        expect(article.article_img_url).toBe(
-          "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
-        );
-        expect(article.created_at).toBe("2020-07-09T20:11:00.000Z");
-        expect(article.votes).toBe(100);
-        expect(article.article_id).toBe(1);
-      });
+  describe("GET", () => {
+    test("GET 200: Responds with specified article object.", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article.title).toBe("Living in the shadow of a great man");
+          expect(article.topic).toBe("mitch");
+          expect(article.author).toBe("butter_bridge");
+          expect(article.body).toBe("I find this existence challenging");
+          expect(article.topic).toBe("mitch");
+          expect(article.article_img_url).toBe(
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+          );
+          expect(article.created_at).toBe("2020-07-09T20:11:00.000Z");
+          expect(article.votes).toBe(100);
+          expect(article.article_id).toBe(1);
+        });
+    });
+
+    test("GET 404: Responds with error message when passed article_id that doesn't exist.", () => {
+      return request(app)
+        .get("/api/articles/99")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Article not found." });
+        });
+    });
+
+    test("GET 400: Responds with error message when passed invalid article_id.", () => {
+      return request(app)
+        .get("/api/articles/latest")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
   });
 
-  test("GET 404: Responds with error message when passed article_id that doesn't exist.", () => {
-    return request(app)
-      .get("/api/articles/99")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Article not found." });
-      });
-  });
+  describe("PATCH", () => {
+    test("PATCH 200: Responds with updated article.", () => {
+      const exampleArticle = {
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        votes: expect.any(Number),
+        created_at: expect.any(String),
+        article_img_url: expect.any(String),
+        article_id: expect.any(Number),
+      };
 
-  test("GET 400: Responds with error message when passed invalid article_id.", () => {
-    return request(app)
-      .get("/api/articles/latest")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Bad request." });
-      });
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/3")
+        .send(newVote)
+        .expect(200)
+        .then(({ body }) => {
+          const { updatedArticle } = body;
+          expect(updatedArticle).toMatchObject(exampleArticle);
+          expect(updatedArticle.votes).toBe(1);
+        });
+    });
+
+    test("PATCH 400: Responds with an error message when passed an invalid value for inc_votes.", () => {
+      const newVote = { inc_votes: "seven" };
+      return request(app)
+        .patch("/api/articles/3")
+        .send(newVote)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
+
+    test("PATCH 400: Responds with an error message when passed an invalid request object.", () => {
+      const newVote = { new_votes: 10 };
+      return request(app)
+        .patch("/api/articles/3")
+        .send(newVote)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
+
+    test("PATCH 400: Responds with an error message when passed an invalid article_id.", () => {
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/latest")
+        .send(newVote)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
+
+    test("PATCH 404: Responds with an error message when passed an article_id that doesnt exist.", () => {
+      const newVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/99")
+        .send(newVote)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid article_id." });
+        });
+    });
   });
 });
 
@@ -223,7 +294,7 @@ describe("/api/articles/:article_id/comments", () => {
           });
       });
 
-      test('POST 404: Responds with error message when passed username that doesnt exist.', () => {
+      test("POST 404: Responds with error message when passed username that doesnt exist.", () => {
         const newComment = {
           body: "interesting read!",
           username: "rmachaal",
@@ -237,7 +308,7 @@ describe("/api/articles/:article_id/comments", () => {
           });
       });
 
-      test('POST 400: Responds with error message when passed request body with no body property.', () => {
+      test("POST 400: Responds with error message when passed request body with no body property.", () => {
         const newComment = {
           username: "rogersop",
         };
@@ -246,7 +317,7 @@ describe("/api/articles/:article_id/comments", () => {
           .send(newComment)
           .expect(400)
           .then(({ body }) => {
-            expect(body).toEqual({ message: "Comment cannot be blank." });
+            expect(body).toEqual({ message: "Invalid request." });
           });
       });
 

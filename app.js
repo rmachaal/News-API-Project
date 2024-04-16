@@ -5,7 +5,8 @@ const {
   getArticleById,
   getArticles,
   getCommentsByArticleId,
-  postComment,
+    postComment,
+  patchArticle
 } = require("./controllers/app.controller");
 
 const app = express();
@@ -23,6 +24,8 @@ app.get("/api/articles/:article_id", getArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postComment);
+
+app.patch("/api/articles/:article_id", patchArticle);
 
 app.all("*", (req, res, next) => {
   res.status(400).send({ message: "Invalid request" });
@@ -44,7 +47,7 @@ app.use((err, req, res, next) => {
 
 app.use((err, req, res, next) => {
   if (err.code === "23502") {
-    res.status(400).send({ message: "Comment cannot be blank." });
+    res.status(400).send({ message: "Invalid request." });
   }
   next(err);
 });
