@@ -1,4 +1,4 @@
-const { deleteComment } = require("../controllers/app.controller");
+const { deleteComment, getUsers } = require("../controllers/app.controller");
 const db = require("../db/connection");
 
 function readTopics() {
@@ -112,6 +112,12 @@ function deleteCommentModel(comment_id) {
     });
 }
 
+function getUsersModel() {
+  return db.query(`SELECT * FROM users;`).then(({ rows }) => {
+    return rows;
+  });
+}
+
 module.exports = {
   readTopics,
   readArticleById,
@@ -121,4 +127,5 @@ module.exports = {
   addsComment,
   updatesArticle,
   deleteCommentModel,
+  getUsersModel,
 };
