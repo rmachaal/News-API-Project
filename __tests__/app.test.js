@@ -52,7 +52,6 @@ describe("/api/articles/:article_id", () => {
           expect(article.topic).toBe("mitch");
           expect(article.author).toBe("butter_bridge");
           expect(article.body).toBe("I find this existence challenging");
-          expect(article.topic).toBe("mitch");
           expect(article.article_img_url).toBe(
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
           );
@@ -146,6 +145,29 @@ describe("/api/articles/:article_id", () => {
         .expect(404)
         .then(({ body }) => {
           expect(body).toEqual({ message: "Invalid article_id." });
+        });
+    });
+  });
+
+  describe("GET /api/articles/:article_id (comment_count)", () => {
+    test("GET 200: Responds with given article object, to include comment count.", () => {
+      const exampleArticle = {
+        article_id: expect.any(Number),
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        created_at: expect.any(String),
+        votes: expect.any(Number),
+        article_img_url: expect.any(String),
+        comment_count: expect.any(Number)
+      };
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          const { article } = body;
+          expect(article).toMatchObject(exampleArticle);
         });
     });
   });
