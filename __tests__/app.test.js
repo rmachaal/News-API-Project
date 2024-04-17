@@ -152,40 +152,65 @@ describe("/api/articles/:article_id", () => {
 });
 
 describe("/api/articles", () => {
-  test("GET 200: Responds with array of all article objects.", () => {
-    const exampleArticle = {
-      title: expect.any(String),
-      topic: expect.any(String),
-      author: expect.any(String),
-      votes: expect.any(Number),
-      created_at: expect.any(String),
-      article_img_url: expect.any(String),
-      article_id: expect.any(Number),
-      comment_count: expect.any(Number),
-    };
-    return request(app)
-      .get("/api/articles")
-      .expect(200)
-      .then(({ body }) => {
-        const { articles } = body;
-        expect(articles.length).toBe(13);
-        articles.forEach((article) => {
-          expect(article).toMatchObject(exampleArticle);
+  describe("GET /api/articles", () => {
+    test("GET 200: Responds with array of all article objects.", () => {
+      const exampleArticle = {
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        votes: expect.any(Number),
+        created_at: expect.any(String),
+        article_img_url: expect.any(String),
+        article_id: expect.any(Number),
+        comment_count: expect.any(Number),
+      };
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          articles.forEach((article) => {
+            expect(article).toMatchObject(exampleArticle);
+          });
         });
-      });
+    });
+
+    test("GET 200: Responds with all article objects sorted by date in descending order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+          articles.forEach((article) => {
+            expect(article).not.toHaveProperty("body");
+          });
+        });
+    });
   });
 
-  test("GET 200: Responds with all article objects sorted by date in descending order", () => {
-    return request(app)
-      .get("/api/articles")
-      .expect(200)
-      .then(({ body }) => {
-        const { articles } = body;
-        expect(articles).toBeSortedBy("created_at", { descending: true });
-        articles.forEach((article) => {
-          expect(article).not.toHaveProperty("body");
+  describe("GET /api/articles (topic query)", () => {
+    test("GET 200: Responds with array of all articles for given topic value.", () => {
+      return request(app)
+        .get("/api/articles?topic=cats")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(1);
+          articles.forEach((article) => {
+            expect(article.topic).toBe("cats");
+          });
         });
-      });
+    });
+    test("GET 404: Responds with error message when passed a topic value that doesnt exist.", () => {
+      return request(app)
+        .get("/api/articles?topic=weather")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Topic not found." });
+        });
+    });
   });
 });
 
@@ -240,100 +265,100 @@ describe("/api/articles/:article_id/comments", () => {
           expect(comments.length).toBe(0);
         });
     });
+  });
 
-    describe("POST", () => {
-      test("POST 201: Responds with newly created comment for given article_id.", () => {
-        const newComment = {
-          body: "interesting read!",
-          username: "rogersop",
-        };
+  describe("POST", () => {
+    test("POST 201: Responds with newly created comment for given article_id.", () => {
+      const newComment = {
+        body: "interesting read!",
+        username: "rogersop",
+      };
 
-        const expectedComment = {
-          comment_id: expect.any(Number),
-          body: "interesting read!",
-          article_id: 3,
-          author: "rogersop",
-          votes: expect.any(Number),
-          created_at: expect.any(String),
-        };
-        return request(app)
-          .post("/api/articles/3/comments")
-          .send(newComment)
-          .expect(201)
-          .then(({ body }) => {
-            const { comment } = body;
-            expect(comment).toMatchObject(expectedComment);
-          });
-      });
+      const expectedComment = {
+        comment_id: expect.any(Number),
+        body: "interesting read!",
+        article_id: 3,
+        author: "rogersop",
+        votes: expect.any(Number),
+        created_at: expect.any(String),
+      };
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body }) => {
+          const { comment } = body;
+          expect(comment).toMatchObject(expectedComment);
+        });
+    });
 
-      test("POST 400: Responds with error message when passed invalid article_id.", () => {
-        const newComment = {
-          body: "interesting read!",
-          username: "rogersop",
-        };
-        return request(app)
-          .post("/api/articles/earliest/comments")
-          .send(newComment)
-          .expect(400)
-          .then(({ body }) => {
-            expect(body).toEqual({ message: "Bad request." });
-          });
-      });
+    test("POST 400: Responds with error message when passed invalid article_id.", () => {
+      const newComment = {
+        body: "interesting read!",
+        username: "rogersop",
+      };
+      return request(app)
+        .post("/api/articles/earliest/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
 
-      test("POST 404: Responds with error message when passed article_id that doesnt exist.", () => {
-        const newComment = {
-          body: "interesting read!",
-          username: "rogersop",
-        };
-        return request(app)
-          .post("/api/articles/99/comments")
-          .send(newComment)
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).toEqual({ message: "Invalid request." });
-          });
-      });
+    test("POST 404: Responds with error message when passed article_id that doesnt exist.", () => {
+      const newComment = {
+        body: "interesting read!",
+        username: "rogersop",
+      };
+      return request(app)
+        .post("/api/articles/99/comments")
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
 
-      test("POST 404: Responds with error message when passed username that doesnt exist.", () => {
-        const newComment = {
-          body: "interesting read!",
-          username: "rmachaal",
-        };
-        return request(app)
-          .post("/api/articles/3/comments")
-          .send(newComment)
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).toEqual({ message: "Invalid request." });
-          });
-      });
+    test("POST 404: Responds with error message when passed username that doesnt exist.", () => {
+      const newComment = {
+        body: "interesting read!",
+        username: "rmachaal",
+      };
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
 
-      test("POST 400: Responds with error message when passed request body with no body property.", () => {
-        const newComment = {
-          username: "rogersop",
-        };
-        return request(app)
-          .post("/api/articles/3/comments")
-          .send(newComment)
-          .expect(400)
-          .then(({ body }) => {
-            expect(body).toEqual({ message: "Invalid request." });
-          });
-      });
+    test("POST 400: Responds with error message when passed request body with no body property.", () => {
+      const newComment = {
+        username: "rogersop",
+      };
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
 
-      test("POST 400: Responds with error message when passed request body with empty body property.", () => {
-        const newComment = {
-          body: "",
-          username: "rogersop",
-        };
-        return request(app)
-          .post("/api/articles/3/comments")
-          .send(newComment)
-          .expect(400)
-          .then(({ body }) => {
-            expect(body).toEqual({ message: "Comment cannot be blank." });
-          });
-      });
+    test("POST 400: Responds with error message when passed request body with empty body property.", () => {
+      const newComment = {
+        body: "",
+        username: "rogersop",
+      };
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Comment cannot be blank." });
+        });
     });
   });
 });
@@ -377,7 +402,6 @@ describe("/api/users", () => {
       .expect(200)
       .then(({ body }) => {
         const { users } = body;
-        console.log(users)
         users.forEach((user) => {
           expect(user).toMatchObject(exampleUser);
         });

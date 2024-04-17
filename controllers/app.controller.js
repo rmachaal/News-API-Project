@@ -1,13 +1,13 @@
 const {
   readTopics,
   readArticleById,
-  readArticles,
+  getArticlesModel,
   readCommentsByArticleId,
   checksArticleExists,
   addsComment,
   updatesArticle,
   deleteCommentModel,
-  getUsersModel
+  getUsersModel,
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -22,9 +22,10 @@ function getEndpoints(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  readArticles().then((articles) => {
+  const { topic } = req.query;
+  getArticlesModel(topic).then((articles) => {
     res.status(200).send({ articles });
-  });
+  }).catch(next)
 }
 
 function getArticleById(req, res, next) {
@@ -98,5 +99,5 @@ module.exports = {
   postComment,
   patchArticle,
   deleteComment,
-  getUsers
+  getUsers,
 };

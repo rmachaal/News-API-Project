@@ -7,10 +7,14 @@ function readTopics() {
   });
 }
 
-function readArticles() {
-  return db
-    .query(
-      `SELECT articles.article_id,
+function getArticlesModel(topic) {
+  const validTopics = ["mitch", "cats"];
+
+  if (topic && !validTopics.includes(topic)) {
+    return Promise.reject({ status: 404, message: "Topic not found." });
+  }
+
+  let sqlQuery = `SELECT articles.article_id,
       articles.title,
       articles.topic,
       articles.author,
@@ -20,12 +24,23 @@ function readArticles() {
       COUNT(comments.article_id) ::INTEGER AS comment_count
       FROM articles
       LEFT JOIN comments ON articles.article_id = comments.article_id
-      GROUP BY articles.article_id
-      ORDER BY articles.created_at DESC;`
-    )
-    .then(({ rows }) => {
-      return rows;
-    });
+      `;
+
+  const query = [];
+
+  if (topic) {
+    sqlQuery += ` WHERE topic=$1
+    GROUP BY articles.article_id
+    ORDER BY articles.created_at DESC;`;
+    query.push(topic);
+  } else {
+    sqlQuery += `GROUP BY articles.article_id
+      ORDER BY articles.created_at DESC;`;
+  }
+
+  return db.query(sqlQuery, query).then(({ rows }) => {
+    return rows;
+  });
 }
 
 function readArticleById(article_id) {
@@ -121,7 +136,7 @@ function getUsersModel() {
 module.exports = {
   readTopics,
   readArticleById,
-  readArticles,
+  getArticlesModel,
   readCommentsByArticleId,
   checksArticleExists,
   addsComment,
