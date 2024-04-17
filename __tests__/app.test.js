@@ -338,6 +338,33 @@ describe("/api/articles/:article_id/comments", () => {
   });
 });
 
+describe("/api/comments/:comment_id", () => {
+  test("DELETE 204: Responds with no content in response body.", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+  test("DELETE 404: Responds with error message when passed comment_id that doesnt exist.", () => {
+    return request(app)
+      .delete("/api/comments/99")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Comment not found." });
+      });
+  });
+  test("DELETE 400: Responds with error message when passed invalid comment_id.", () => {
+    return request(app)
+      .delete("/api/comments/first")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Bad request." });
+      });
+  });
+});
+
 describe("general errors", () => {
   test("GET 400: Responds with error message when called with incorrect endpoint.", () => {
     return request(app)

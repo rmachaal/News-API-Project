@@ -100,5 +100,9 @@
         "created_at": "2020-02-23T12:01:00.000Z"
       }
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "responds with 204 status code and no content in response body.",
+    "queries": []
   }
 }

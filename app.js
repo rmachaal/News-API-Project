@@ -5,8 +5,9 @@ const {
   getArticleById,
   getArticles,
   getCommentsByArticleId,
-    postComment,
-  patchArticle
+  postComment,
+  patchArticle,
+  deleteComment,
 } = require("./controllers/app.controller");
 
 const app = express();
@@ -26,6 +27,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchArticle);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.all("*", (req, res, next) => {
   res.status(400).send({ message: "Invalid request" });
