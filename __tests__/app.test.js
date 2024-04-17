@@ -365,6 +365,26 @@ describe("/api/comments/:comment_id", () => {
   });
 });
 
+describe("/api/users", () => {
+  test("GET 200: Responds with array of all user objects.", () => {
+    const exampleUser = {
+      username: expect.any(String),
+      name: expect.any(String),
+      avatar_url: expect.any(String),
+    };
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { users } = body;
+        console.log(users)
+        users.forEach((user) => {
+          expect(user).toMatchObject(exampleUser);
+        });
+      });
+  });
+});
+
 describe("general errors", () => {
   test("GET 400: Responds with error message when called with incorrect endpoint.", () => {
     return request(app)

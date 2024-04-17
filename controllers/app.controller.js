@@ -7,6 +7,7 @@ const {
   addsComment,
   updatesArticle,
   deleteCommentModel,
+  getUsersModel
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -71,14 +72,21 @@ function patchArticle(req, res, next) {
 
 function deleteComment(req, res, next) {
   const { comment_id } = req.params;
-  deleteCommentModel(comment_id).then((deleted) => {
-    if (deleted) {
-      res.status(204).send();
-    } else {
-      res.status(404).send({ message: "Comment not found." });
-    }
-  })
-  .catch(next)
+  deleteCommentModel(comment_id)
+    .then((deleted) => {
+      if (deleted) {
+        res.status(204).send();
+      } else {
+        res.status(404).send({ message: "Comment not found." });
+      }
+    })
+    .catch(next);
+}
+
+function getUsers(req, res, next) {
+  getUsersModel().then((users) => {
+    res.status(200).send({ users });
+  });
 }
 
 module.exports = {
@@ -90,4 +98,5 @@ module.exports = {
   postComment,
   patchArticle,
   deleteComment,
+  getUsers
 };
