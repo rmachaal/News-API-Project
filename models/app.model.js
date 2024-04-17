@@ -1,3 +1,4 @@
+const { deleteComment } = require("../controllers/app.controller");
 const db = require("../db/connection");
 
 function readTopics() {
@@ -99,6 +100,18 @@ RETURNING *;`,
     });
 }
 
+function deleteCommentModel(comment_id) {
+  return db
+    .query(
+      `DELETE FROM comments
+  WHERE comment_id=$1;`,
+      [comment_id]
+    )
+    .then(({ rowCount }) => {
+      return rowCount === 1;
+    });
+}
+
 module.exports = {
   readTopics,
   readArticleById,
@@ -107,4 +120,5 @@ module.exports = {
   checksArticleExists,
   addsComment,
   updatesArticle,
+  deleteCommentModel,
 };

@@ -6,6 +6,7 @@ const {
   checksArticleExists,
   addsComment,
   updatesArticle,
+  deleteCommentModel,
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -59,12 +60,25 @@ function postComment(req, res, next) {
 }
 
 function patchArticle(req, res, next) {
-    const { article_id } = req.params;
-    const {inc_votes} = req.body
-    updatesArticle(article_id, inc_votes).then((updatedArticle) => {
-    res.status(200).send({ updatedArticle });
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+  updatesArticle(article_id, inc_votes)
+    .then((updatedArticle) => {
+      res.status(200).send({ updatedArticle });
     })
-    .catch(next)
+    .catch(next);
+}
+
+function deleteComment(req, res, next) {
+  const { comment_id } = req.params;
+  deleteCommentModel(comment_id).then((deleted) => {
+    if (deleted) {
+      res.status(204).send();
+    } else {
+      res.status(404).send({ message: "Comment not found." });
+    }
+  })
+  .catch(next)
 }
 
 module.exports = {
@@ -75,4 +89,5 @@ module.exports = {
   getCommentsByArticleId,
   postComment,
   patchArticle,
+  deleteComment,
 };
