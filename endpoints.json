@@ -48,6 +48,7 @@
   "PATCH /api/articles/:article_id": {
     "description": "responds with updated article object for given article_id",
     "queries": [],
+    "exampleRequestBody": { "inc_votes": 1 },
     "exampleResponse": {
       "updatedArticle": [
         {
@@ -90,6 +91,10 @@
   "POST /api/articles/:article_id/comments": {
     "description": "responds with newly created comment for given article_id.",
     "queries": [],
+    "exampleRequestBody": {
+      "body": "interesting read!",
+      "username": "rogersop"
+    },
     "exampleResponse": {
       "comment": {
         "comment_id": 4,
