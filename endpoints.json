@@ -1,131 +1,133 @@
 {
-  "GET /api": {
-    "description": "serves up a json representation of all the available endpoints of the api"
-  },
-  "GET /api/topics": {
-    "description": "serves an array of all topics",
-    "queries": [],
-    "exampleResponse": {
-      "topics": [{ "slug": "football", "description": "Footie!" }]
+  "GET": {
+    "/api": {
+      "description": "Serves up a JSON representation of all available endpoints of the API."
+    },
+    "/api/topics": {
+      "description": "Serves an array of all topics.",
+      "exampleResponse": {
+        "topics": [{ "slug": "football", "description": "Footie!" }]
+      }
+    },
+    "/api/articles": {
+      "description": "Serves an array of all articles.",
+      "queries": ["author", "topic", "sort_by", "order"],
+      "exampleResponse": {
+        "articles": [
+          {
+            "article_id": 1,
+            "title": "Seafood substitutions are increasing",
+            "topic": "cooking",
+            "author": "weegembump",
+            "created_at": "2018-05-30T15:59:13.341Z",
+            "article_img_url": "https://exampleimage.com",
+            "votes": 0,
+            "comment_count": 6
+          }
+        ]
+      }
+    },
+    "/api/articles/:article_id": {
+      "description": "Responds with article object for given article_id.",
+      "queries": [],
+      "exampleResponse": {
+        "article": [
+          {
+            "title": "Seafood substitutions are increasing",
+            "topic": "cooking",
+            "author": "weegembump",
+            "body": "Text from the article..",
+            "created_at": "2018-05-30T15:59:13.341Z",
+            "votes": 0,
+            "comment_count": 6,
+            "article_id": 15
+          }
+        ]
+      }
+    },
+    "/api/articles/:article_id/comments": {
+      "description": "Responds with comments for given article_id, with most recent comments first.",
+      "exampleResponse": {
+        "comments": [
+          {
+            "comment_id": 4,
+            "body": "I carry a log — yes. Is it funny to you? It is not to me.",
+            "article_id": 1,
+            "author": "icellusedkars",
+            "votes": -100,
+            "created_at": "2020-02-23T12:01:00.000Z"
+          },
+          {
+            "comment_id": 9,
+            "body": "Superficially charming",
+            "article_id": 1,
+            "author": "icellusedkars",
+            "votes": 0,
+            "created_at": "2020-01-01T03:08:00.000Z"
+          }
+        ]
+      }
+    },
+    "/api/users": {
+      "description": "Serves an array of all users.",
+      "exampleResponse": {
+        "users": [
+          {
+            "username": "butter_bridge",
+            "name": "jonny",
+            "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+          },
+          {
+            "username": "icellusedkars",
+            "name": "sam",
+            "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
+          }
+        ]
+      }
     }
   },
-  "GET /api/articles": {
-    "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
-    "exampleResponse": {
-      "articles": [
-        {
-          "article_id": 1,
-          "title": "Seafood substitutions are increasing",
-          "topic": "cooking",
-          "author": "weegembump",
-          "created_at": "2018-05-30T15:59:13.341Z",
-          "article_img_url": "https://exampleimage.com",
-          "votes": 0,
-          "comment_count": 6
-        }
-      ]
+  "PATCH": {
+    "/api/articles/:article_id": {
+      "description": "Responds with updated article object for given article_id.",
+      "exampleRequestBody": { "inc_votes": 1 },
+      "exampleResponse": {
+        "updatedArticle": [
+          {
+            "title": "Seafood substitutions are increasing",
+            "topic": "cooking",
+            "author": "weegembump",
+            "body": "Text from the article..",
+            "created_at": "2018-05-30T15:59:13.341Z",
+            "votes": 3,
+            "comment_count": 6,
+            "article_id": 15
+          }
+        ]
+      }
     }
   },
-  "GET /api/articles/:article_id": {
-    "description": "responds with article object for given article_id",
-    "queries": [],
-    "exampleResponse": {
-      "article": [
-        {
-          "title": "Seafood substitutions are increasing",
-          "topic": "cooking",
-          "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": "2018-05-30T15:59:13.341Z",
-          "votes": 0,
-          "comment_count": 6,
-          "article_id": 15
-        }
-      ]
-    }
-  },
-  "PATCH /api/articles/:article_id": {
-    "description": "responds with updated article object for given article_id",
-    "queries": [],
-    "exampleRequestBody": { "inc_votes": 1 },
-    "exampleResponse": {
-      "updatedArticle": [
-        {
-          "title": "Seafood substitutions are increasing",
-          "topic": "cooking",
-          "author": "weegembump",
-          "body": "Text from the article..",
-          "created_at": "2018-05-30T15:59:13.341Z",
-          "votes": 3,
-          "comment_count": 6,
-          "article_id": 15
-        }
-      ]
-    }
-  },
-  "GET /api/articles/:article_id/comments": {
-    "description": "responds with comments for given article_id, with most recent comments first.",
-    "queries": [],
-    "exampleResponse": {
-      "comments": [
-        {
+  "POST": {
+    "/api/articles/:article_id/comments": {
+      "description": "Responds with newly created comment for given article_id.",
+      "exampleRequestBody": {
+        "body": "interesting read!",
+        "username": "rogersop"
+      },
+      "exampleResponse": {
+        "comment": {
           "comment_id": 4,
           "body": "I carry a log — yes. Is it funny to you? It is not to me.",
           "article_id": 1,
           "author": "icellusedkars",
           "votes": -100,
           "created_at": "2020-02-23T12:01:00.000Z"
-        },
-        {
-          "comment_id": 9,
-          "body": "Superficially charming",
-          "article_id": 1,
-          "author": "icellusedkars",
-          "votes": 0,
-          "created_at": "2020-01-01T03:08:00.000Z"
         }
-      ]
-    }
-  },
-  "POST /api/articles/:article_id/comments": {
-    "description": "responds with newly created comment for given article_id.",
-    "queries": [],
-    "exampleRequestBody": {
-      "body": "interesting read!",
-      "username": "rogersop"
-    },
-    "exampleResponse": {
-      "comment": {
-        "comment_id": 4,
-        "body": "I carry a log — yes. Is it funny to you? It is not to me.",
-        "article_id": 1,
-        "author": "icellusedkars",
-        "votes": -100,
-        "created_at": "2020-02-23T12:01:00.000Z"
       }
     }
   },
-  "DELETE /api/comments/:comment_id": {
-    "description": "responds with 204 status code and no content in response body.",
-    "queries": []
-  },
-  "GET /api/users": {
-    "description": "serves an array of all users",
-    "queries": [],
-    "exampleResponse": {
-      "users": [
-        {
-          "username": "butter_bridge",
-          "name": "jonny",
-          "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
-        },
-        {
-          "username": "icellusedkars",
-          "name": "sam",
-          "avatar_url": "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4"
-        }
-      ]
+  "DELETE": {
+    "/api/comments/:comment_id": {
+      "description": "Responds with 204 status code and no content in response body."
     }
   }
 }
