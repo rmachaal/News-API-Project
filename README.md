@@ -37,7 +37,3 @@ In each file add `PGDATABASE=`, with the correct database name for that environm
 ## Requirements
 
 This project requires node.js version 10 or higher and PostgreSQL version 8.11.5 or higher (within 8.x series).
-
-<div style="background-color: #f0f0f0; padding: 10px;">
-This is a block with a different background color.
-</div>
