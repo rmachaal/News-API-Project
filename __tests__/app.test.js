@@ -160,7 +160,7 @@ describe("/api/articles/:article_id", () => {
         created_at: expect.any(String),
         votes: expect.any(Number),
         article_img_url: expect.any(String),
-        comment_count: expect.any(Number)
+        comment_count: expect.any(Number),
       };
       return request(app)
         .get("/api/articles/1")
@@ -231,6 +231,59 @@ describe("/api/articles", () => {
         .expect(404)
         .then(({ body }) => {
           expect(body).toEqual({ message: "Topic not found." });
+        });
+    });
+  });
+
+  describe("GET /api/articles (sorting queries)", () => {
+    test("GET 200: Responds with array of all article objects sorted by queried column.", () => {
+      return request(app)
+        .get("/api/articles?sort_by=votes")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("votes", { descending: true });
+        });
+    });
+    test("GET 200: Responds with array of all article objects sorted by queried column.", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("author", { descending: true });
+        });
+    });
+    test("GET 200: Responds with array of all article objects sorted by created_at when no query passed.", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("GET 200: Responds with array of all article objects sorted by queried column and in order specified.", () => {
+      return request(app)
+        .get("/api/articles?sort_by=author&&order=ASC")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("author", { descending: false });
+        });
+    });
+    test("GET 200: Responds with array of all article objects - defaults to sorting by created_at in descending order when passed invalid query.", () => {
+      return request(app)
+        .get("/api/articles?sort_by=tags&&order=LEFT")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("created_at", { descending: true });
         });
     });
   });
@@ -424,7 +477,7 @@ describe("/api/users", () => {
       .expect(200)
       .then(({ body }) => {
         const { users } = body;
-        expect(users.length).toBe(4)
+        expect(users.length).toBe(4);
         users.forEach((user) => {
           expect(user).toMatchObject(exampleUser);
         });

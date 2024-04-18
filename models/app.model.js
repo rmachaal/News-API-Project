@@ -7,8 +7,20 @@ function getTopicsModel() {
   });
 }
 
-function getArticlesModel(topic) {
+function getArticlesModel(topic, sort_by, order) {
+
   const validTopics = ["mitch", "cats"];
+
+  const validColumns = [
+    "created_at",
+    "votes",
+    "article_id",
+    "author",
+    "body",
+    "article_img_url",
+    "title",
+    "topic",
+  ];
 
   if (topic && !validTopics.includes(topic)) {
     return Promise.reject({ status: 404, message: "Topic not found." });
@@ -29,13 +41,22 @@ function getArticlesModel(topic) {
   const query = [];
 
   if (topic) {
-    sqlQuery += ` WHERE topic=$1
-    GROUP BY articles.article_id
-    ORDER BY articles.created_at DESC;`;
+    sqlQuery += ` WHERE topic=$1 `;
     query.push(topic);
+  }
+
+  if (sort_by && validColumns.includes(sort_by)) {
+    sqlQuery += `GROUP BY articles.article_id
+    ORDER BY articles.${sort_by}`;
   } else {
     sqlQuery += `GROUP BY articles.article_id
-      ORDER BY articles.created_at DESC;`;
+      ORDER BY articles.created_at`;
+  }
+
+  if (order === "ASC") {
+    sqlQuery += ` ASC;`;
+  } else {
+    sqlQuery += ` DESC;`;
   }
 
   return db.query(sqlQuery, query).then(({ rows }) => {

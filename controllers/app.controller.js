@@ -22,8 +22,8 @@ function getEndpoints(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  const { topic } = req.query;
-  getArticlesModel(topic)
+  const { topic, sort_by, order } = req.query;
+  getArticlesModel(topic, sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles });
     })
