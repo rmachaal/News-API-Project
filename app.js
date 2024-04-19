@@ -1,42 +1,21 @@
 const express = require("express");
-const {
-  getTopics,
-  getEndpoints,
-  getArticleById,
-  getArticles,
-  getCommentsByArticleId,
-  postComment,
-  patchArticle,
-  deleteComment,
-  getUsers
-} = require("./controllers/app.controller");
 
+// creates express app
 const app = express();
+// imports API router
+const apiRouter = require("./routes/api-router");
 
 app.use(express.json());
 
-app.get("/api", getEndpoints);
+// API router
+app.use("/api", apiRouter);
 
-app.get("/api/topics", getTopics);
-
-app.get("/api/articles", getArticles);
-
-app.get("/api/articles/:article_id", getArticleById);
-
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-
-app.get("/api/users", getUsers)
-
-app.post("/api/articles/:article_id/comments", postComment);
-
-app.patch("/api/articles/:article_id", patchArticle);
-
-app.delete("/api/comments/:comment_id", deleteComment);
-
+// for invalid endpoints
 app.all("*", (req, res, next) => {
   res.status(400).send({ message: "Invalid request" });
 });
 
+// error-handling middleware
 app.use((err, req, res, next) => {
   if (err.code === "22P02") {
     res.status(400).send({ message: "Bad request." });
