@@ -439,29 +439,82 @@ describe("/api/articles/:article_id/comments", () => {
 });
 
 describe("/api/comments/:comment_id", () => {
-  test("DELETE 204: Responds with no content in response body.", () => {
-    return request(app)
-      .delete("/api/comments/1")
-      .expect(204)
-      .then(({ body }) => {
-        expect(body).toEqual({});
-      });
+  describe("DELETE", () => {
+    test("DELETE 204: Responds with no content in response body.", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then(({ body }) => {
+          expect(body).toEqual({});
+        });
+    });
+    test("DELETE 404: Responds with error message when passed comment_id that doesnt exist.", () => {
+      return request(app)
+        .delete("/api/comments/99")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Comment not found." });
+        });
+    });
+    test("DELETE 400: Responds with error message when passed invalid comment_id.", () => {
+      return request(app)
+        .delete("/api/comments/first")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
   });
-  test("DELETE 404: Responds with error message when passed comment_id that doesnt exist.", () => {
-    return request(app)
-      .delete("/api/comments/99")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Comment not found." });
-      });
-  });
-  test("DELETE 400: Responds with error message when passed invalid comment_id.", () => {
-    return request(app)
-      .delete("/api/comments/first")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body).toEqual({ message: "Bad request." });
-      });
+
+  describe("PATCH", () => {
+    test("PATCH 201: Responds with updated comment.", () => {
+      const newVotes = { inc_votes: 2 };
+      const testComment = {
+        body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+        votes: 18,
+        author: "butter_bridge",
+        article_id: 9,
+        created_at: "2020-04-06T12:17:00.000Z",
+      };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVotes)
+        .expect(201)
+        .then(({ body }) => {
+          const { updatedComment } = body;
+          expect(updatedComment).toMatchObject(testComment);
+        });
+    });
+    test("PATCH 404: Responds with error message when passed comment_id which doesnt exist.", () => {
+      const newVotes = { inc_votes: 2 };
+      return request(app)
+        .patch("/api/comments/99")
+        .send(newVotes)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Comment not found." });
+        });
+    });
+    test("PATCH 400: Responds with error message when passed invalid comment_id.", () => {
+      const newVotes = { inc_votes: 2 };
+      return request(app)
+        .patch("/api/comments/newest")
+        .send(newVotes)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad request." });
+        });
+    });
+    test("PATCH 400: Responds with error message when passed invalid request body.", () => {
+      const newVotes = { votes: "ten" };
+      return request(app)
+        .patch("/api/comments/1")
+        .send(newVotes)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
   });
 });
 
@@ -501,7 +554,7 @@ describe("/api/users/:username", () => {
         expect(user).toMatchObject(testUser);
       });
   });
-  test('GET 404: Responds with error message when passed username that doesnt exist.', () => {
+  test("GET 404: Responds with error message when passed username that doesnt exist.", () => {
     return request(app)
       .get("/api/users/rmachaal")
       .expect(404)

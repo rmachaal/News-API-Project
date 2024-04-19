@@ -1,4 +1,8 @@
-const { deleteComment, getUsers } = require("../controllers/app.controller");
+const {
+  deleteComment,
+  getUsers,
+  patchComment,
+} = require("../controllers/app.controller");
 const db = require("../db/connection");
 
 function getTopicsModel() {
@@ -176,6 +180,24 @@ function getUserModel(username) {
     });
 }
 
+function patchCommentModel(comment_id, newVotes) {
+  return db
+    .query(
+      `UPDATE comments
+SET
+votes = votes + $1
+WHERE comment_id=$2
+RETURNING *;`,
+      [newVotes, comment_id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, message: "Comment not found." });
+      }
+      return rows[0];
+    });
+}
+
 module.exports = {
   getTopicsModel,
   getArticleByIdModel,
@@ -186,5 +208,6 @@ module.exports = {
   updatesArticle,
   deleteCommentModel,
   getUsersModel,
-  getUserModel
+  getUserModel,
+  patchCommentModel,
 };
