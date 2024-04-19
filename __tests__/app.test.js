@@ -485,6 +485,31 @@ describe("/api/users", () => {
   });
 });
 
+describe("/api/users/:username", () => {
+  test("GET 200: Responds with user for given username.", () => {
+    const testUser = {
+      username: "butter_bridge",
+      name: "jonny",
+      avatar_url:
+        "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+    };
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user).toMatchObject(testUser);
+      });
+  });
+  test('GET 404: Responds with error message when passed username that doesnt exist.', () => {
+    return request(app)
+      .get("/api/users/rmachaal")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "User not found." });
+      });
+  });
+});
 describe("general errors", () => {
   test("GET 400: Responds with error message when called with incorrect endpoint.", () => {
     return request(app)

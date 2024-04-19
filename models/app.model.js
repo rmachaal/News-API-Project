@@ -8,7 +8,6 @@ function getTopicsModel() {
 }
 
 function getArticlesModel(topic, sort_by, order) {
-
   const validTopics = ["mitch", "cats"];
 
   const validColumns = [
@@ -162,6 +161,21 @@ function getUsersModel() {
   });
 }
 
+function getUserModel(username) {
+  return db
+    .query(
+      `SELECT * FROM users
+  WHERE username=$1;`,
+      [username]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({ status: 404, message: "User not found." });
+      }
+      return rows[0];
+    });
+}
+
 module.exports = {
   getTopicsModel,
   getArticleByIdModel,
@@ -172,4 +186,5 @@ module.exports = {
   updatesArticle,
   deleteCommentModel,
   getUsersModel,
+  getUserModel
 };

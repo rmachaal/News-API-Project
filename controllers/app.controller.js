@@ -8,6 +8,7 @@ const {
   updatesArticle,
   deleteCommentModel,
   getUsersModel,
+  getUserModel,
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -92,6 +93,14 @@ function getUsers(req, res, next) {
   });
 }
 
+function getUser(req, res, next) {
+  const { username } = req.params;
+  getUserModel(username).then((user) => {
+    res.status(200).send({ user });
+  })
+  .catch(next)
+}
+
 module.exports = {
   getTopics,
   getEndpoints,
@@ -102,4 +111,5 @@ module.exports = {
   patchArticle,
   deleteComment,
   getUsers,
+  getUser,
 };
