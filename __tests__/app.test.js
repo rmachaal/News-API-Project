@@ -4,6 +4,7 @@ const data = require("../db/data/test-data");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const endpointData = require("../endpoints.json");
+const e = require("express");
 
 beforeEach(() => {
   return seed(data);
@@ -287,6 +288,122 @@ describe("/api/articles", () => {
         });
     });
   });
+
+  describe("POST", () => {
+    test("POST 201: Responds with new article object.", () => {
+      const article = [
+        {
+          author: "lurker",
+          title: "Japanese Papermaking",
+          body: "Japanese paper is primarily made from plants.",
+          topic: "paper",
+        },
+      ];
+      const exampleArticle = {
+        title: expect.any(String),
+        topic: expect.any(String),
+        body: expect.any(String),
+        author: expect.any(String),
+        votes: expect.any(Number),
+        created_at: expect.any(String),
+        article_img_url: expect.any(String),
+        article_id: expect.any(Number),
+        comment_count: expect.any(Number),
+      };
+      return request(app)
+        .post("/api/articles")
+        .send(article)
+        .expect(201)
+        .then(({ body }) => {
+          const { newArticle } = body;
+          expect(newArticle).toMatchObject(exampleArticle);
+        });
+    });
+    test("POST 400: Respond with error message when passed invalid request body.", () => {
+      const article = [
+        {
+          headline: "Japanese Papermaking",
+          body: "Japanese paper is primarily made from plants.",
+          topic: "paper",
+        },
+      ];
+      return request(app)
+        .post("/api/articles")
+        .send(article)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
+    test("POST 404: Responds with error message when passed topic value that doesnt exist.", () => {
+      const article = [
+        {
+          author: "lurker",
+          title: "Japanese Papermaking",
+          body: "Japanese paper is primarily made from plants.",
+          topic: "craft",
+        },
+      ];
+      return request(app)
+        .post("/api/articles")
+        .send(article)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Invalid request." });
+        });
+    });
+  });
+
+  describe("GET /api/articles (pagination)", () => {
+    test("GET 200: Responds with the number of articles as per limit query passed.", () => {
+      return request(app)
+        .get("/api/articles?limit=10")
+        .expect(200)
+        .then(({ body }) => {
+          const { selectedArticles } = body;
+          expect(selectedArticles.length).toBe(10);
+        });
+    });
+    test("GET 200: Responds with the number of articles as per limit query passed.", () => {
+      return request(app)
+        .get("/api/articles?limit=7")
+        .expect(200)
+        .then(({ body }) => {
+          const { selectedArticles } = body;
+          expect(selectedArticles.length).toBe(7);
+        });
+    });
+    test("GET 200: Responds with the number of articles as per limit query passed, starting at page number queried.", () => {
+      return request(app)
+        .get("/api/articles?limit=7&&p=2")
+        .expect(200)
+        .then(({ body }) => {
+          const { selectedArticles } = body;
+          expect(selectedArticles.length).toBe(6);
+        });
+    });
+    test("GET 200: Responds with the number of articles starting at page number queried, limit defaults to 10.", () => {
+      return request(app)
+        .get("/api/articles?p=2")
+        .expect(200)
+        .then(({ body }) => {
+          const { selectedArticles } = body;
+          expect(selectedArticles.length).toBe(3);
+        });
+    });
+    test("GET 200: Responds with the number of articles as per limit query passed for queried topic and total_count property for total number of articles, negating limit.", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch&&limit=6")
+        .expect(200)
+        .then(({ body }) => {
+          const { selectedArticles } = body;
+          expect(selectedArticles.length).toBe(6);
+          selectedArticles.forEach((article) => {
+            expect(article.total_count).toBe(12);
+          });
+        });
+    });
+  });
 });
 
 describe("/api/articles/:article_id/comments", () => {
@@ -436,6 +553,17 @@ describe("/api/articles/:article_id/comments", () => {
         });
     });
   });
+
+  // describe("GET /api/articles/:article_id/comments (pagination)", () => {
+  //   test('GET 200: Responds with the comments paginated as per queries sent.', () => {
+  //     return request(app)
+  //       .get("/api/articles/1/comments?limit=2")
+  //       .expect(200)
+  //       .then(({ body }) => {
+
+  //     })
+  //   });
+  // });
 });
 
 describe("/api/comments/:comment_id", () => {

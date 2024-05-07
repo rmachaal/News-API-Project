@@ -9,7 +9,9 @@ const {
   deleteCommentModel,
   getUsersModel,
   getUserModel,
-  patchCommentModel
+  patchCommentModel,
+  postArticleModel,
+  countArticles,
 } = require("../models/app.model");
 const endpointData = require("../endpoints.json");
 
@@ -24,12 +26,26 @@ function getEndpoints(req, res, next) {
 }
 
 function getArticles(req, res, next) {
-  const { topic, sort_by, order } = req.query;
-  getArticlesModel(topic, sort_by, order)
-    .then((articles) => {
-      res.status(200).send({ articles });
-    })
-    .catch(next);
+  const { topic, sort_by, order, limit, p } = req.query;
+
+  if (limit || p) {
+    Promise.all([
+      getArticlesModel(topic, sort_by, order, limit, p),
+      countArticles(topic),
+    ]).then(([articles, count]) => {
+      const selectedArticles = articles.map((article) => {
+        article.total_count = Number(count.total_count);
+        return article;
+      });
+      res.status(200).send({ selectedArticles });
+    });
+  } else {
+    getArticlesModel(topic, sort_by, order, limit, p)
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch(next);
+  }
 }
 
 function getArticleById(req, res, next) {
@@ -104,12 +120,22 @@ function getUser(req, res, next) {
 }
 
 function patchComment(req, res, next) {
-  const { comment_id } = req.params
-  const {inc_votes} = req.body
-  patchCommentModel(comment_id, inc_votes).then((updatedComment) => {
-    res.status(201).send({ updatedComment });
-  })
-  .catch(next)
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+  patchCommentModel(comment_id, inc_votes)
+    .then((updatedComment) => {
+      res.status(201).send({ updatedComment });
+    })
+    .catch(next);
+}
+
+function postArticle(req, res, next) {
+  const article = req.body;
+  postArticleModel(article)
+    .then((newArticle) => {
+      res.status(201).send({ newArticle });
+    })
+    .catch(next);
 }
 
 module.exports = {
@@ -124,4 +150,5 @@ module.exports = {
   getUsers,
   getUser,
   patchComment,
+  postArticle,
 };

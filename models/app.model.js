@@ -2,8 +2,10 @@ const {
   deleteComment,
   getUsers,
   patchComment,
+  postArticle,
 } = require("../controllers/app.controller");
 const db = require("../db/connection");
+const format = require("pg-format");
 
 function getTopicsModel() {
   return db.query("SELECT * FROM topics;").then(({ rows }) => {
@@ -11,7 +13,7 @@ function getTopicsModel() {
   });
 }
 
-function getArticlesModel(topic, sort_by, order) {
+function getArticlesModel(topic, sort_by, order, limit, p) {
   const validTopics = ["mitch", "cats"];
 
   const validColumns = [
@@ -57,13 +59,48 @@ function getArticlesModel(topic, sort_by, order) {
   }
 
   if (order === "ASC") {
-    sqlQuery += ` ASC;`;
+    sqlQuery += ` ASC`;
   } else {
-    sqlQuery += ` DESC;`;
+    sqlQuery += ` DESC`;
+  }
+
+  if (p && limit && topic) {
+    sqlQuery += ` LIMIT $2 OFFSET $3;`;
+    query.push(limit, limit);
+  } else if (p && limit && !topic) {
+    sqlQuery += ` LIMIT $1 OFFSET $2;`;
+    query.push(limit, limit);
+  } else if (!p && limit && topic) {
+    sqlQuery += ` LIMIT $2;`;
+    query.push(limit);
+  } else if (!p && limit && !topic) {
+    sqlQuery += ` LIMIT $1;`;
+    query.push(limit);
+  } else if (p && !limit) {
+    sqlQuery += ` LIMIT 10 OFFSET 10;`;
   }
 
   return db.query(sqlQuery, query).then(({ rows }) => {
     return rows;
+  });
+}
+
+function countArticles(topic) {
+  let sqlQuery = `SELECT COUNT(*) AS total_count
+  FROM articles`;
+
+  const query = [];
+
+  if (topic) {
+    sqlQuery += ` WHERE topic=$1;`;
+    query.push(topic);
+  }
+
+  // console.log(sqlQuery, query);
+
+  return db.query(sqlQuery, query).then(({ rows }) => {
+    // console.log(rows);
+    return rows[0];
   });
 }
 
@@ -198,6 +235,19 @@ RETURNING *;`,
     });
 }
 
+function postArticleModel(article) {
+  const articleFormatted = article.map((article) => {
+    return [article.author, article.title, article.body, article.topic];
+  });
+  const sqlQuery = format(
+    `INSERT INTO articles (author, title, body, topic) VALUES %L RETURNING *;`,
+    articleFormatted
+  );
+  return db.query(sqlQuery).then(({ rows }) => {
+    return getArticleByIdModel(rows[0].article_id);
+  });
+}
+
 module.exports = {
   getTopicsModel,
   getArticleByIdModel,
@@ -210,4 +260,6 @@ module.exports = {
   getUsersModel,
   getUserModel,
   patchCommentModel,
+  postArticleModel,
+  countArticles,
 };

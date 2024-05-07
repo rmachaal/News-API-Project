@@ -1,9 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 
 // creates express app
 const app = express();
 // imports API router
 const apiRouter = require("./routes/api-router");
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -41,6 +44,11 @@ app.use((err, req, res, next) => {
   if (err.status && err.message) {
     res.status(err.status).send({ message: err.message });
   }
+  next();
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).send({ message: "Internal server error." });
 });
 
 module.exports = app;
