@@ -53,6 +53,9 @@ function getArticlesModel(topic, sort_by, order, limit, p) {
   if (sort_by && validColumns.includes(sort_by)) {
     sqlQuery += `GROUP BY articles.article_id
     ORDER BY articles.${sort_by}`;
+  } else if (sort_by === "comment_count") {
+    sqlQuery += `GROUP BY articles.article_id
+    ORDER BY ${sort_by}`;
   } else {
     sqlQuery += `GROUP BY articles.article_id
       ORDER BY articles.created_at`;
@@ -79,6 +82,8 @@ function getArticlesModel(topic, sort_by, order, limit, p) {
   } else if (p && !limit) {
     sqlQuery += ` LIMIT 10 OFFSET 10;`;
   }
+
+  console.log(sqlQuery);
 
   return db.query(sqlQuery, query).then(({ rows }) => {
     return rows;

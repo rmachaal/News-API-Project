@@ -277,6 +277,16 @@ describe("/api/articles", () => {
           expect(articles).toBeSortedBy("author", { descending: false });
         });
     });
+    test("GET 200: Responds with array of all article objects sorted by queried column and in order specified.", () => {
+      return request(app)
+        .get("/api/articles?sort_by=comment_count&&order=ASC")
+        .expect(200)
+        .then(({ body }) => {
+          const { articles } = body;
+          expect(articles.length).toBe(13);
+          expect(articles).toBeSortedBy("comment_count", { descending: false });
+        });
+    });
     test("GET 200: Responds with array of all article objects - defaults to sorting by created_at in descending order when passed invalid query.", () => {
       return request(app)
         .get("/api/articles?sort_by=tags&&order=LEFT")
