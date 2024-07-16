@@ -1,9 +1,3 @@
-const {
-  deleteComment,
-  getUsers,
-  patchComment,
-  postArticle,
-} = require("../controllers/app.controller");
 const db = require("../db/connection");
 const format = require("pg-format");
 
@@ -14,7 +8,7 @@ function getTopicsModel() {
 }
 
 function getArticlesModel(topic, sort_by, order, limit, p) {
-  const validTopics = ["mitch", "cats"];
+  const validTopics = ["mitch", "cats", "coding", "cooking", "football"];
 
   const validColumns = [
     "created_at",
@@ -83,8 +77,6 @@ function getArticlesModel(topic, sort_by, order, limit, p) {
     sqlQuery += ` LIMIT 10 OFFSET 10;`;
   }
 
-  console.log(sqlQuery);
-
   return db.query(sqlQuery, query).then(({ rows }) => {
     return rows;
   });
@@ -101,10 +93,7 @@ function countArticles(topic) {
     query.push(topic);
   }
 
-  // console.log(sqlQuery, query);
-
   return db.query(sqlQuery, query).then(({ rows }) => {
-    // console.log(rows);
     return rows[0];
   });
 }

@@ -27,7 +27,6 @@ function getEndpoints(req, res, next) {
 
 function getArticles(req, res, next) {
   const { topic, sort_by, order, limit, p } = req.query;
-
   if (limit || p) {
     Promise.all([
       getArticlesModel(topic, sort_by, order, limit, p),
@@ -78,7 +77,7 @@ function postComment(req, res, next) {
     .then((comment) => {
       res.status(201).send({ comment });
     })
-    .catch(next);
+    .catch((err) => next(err));
 }
 
 function patchArticle(req, res, next) {
